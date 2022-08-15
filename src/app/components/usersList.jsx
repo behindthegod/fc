@@ -10,7 +10,7 @@ import _ from "lodash";
 import {useParams} from "react-router-dom";
 import UserPage from "./userPage";
 
-const Users = () => {
+const UsersList = () => {
     const [currentPage, setCurrentPage] = useState();
     const [professions, setProfession] = useState();
     const [selectedProf, setSelectedProf] = useState();
@@ -118,8 +118,8 @@ const Users = () => {
     }
     return "loading...";
 };
-Users.propTypes = {
+UsersList.propTypes = {
     users: PropTypes.array
 };
 
-export default Users;
+export default UsersList;

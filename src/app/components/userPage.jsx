@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom";
 import api from "../api";
 import QualitiesList from "./qualitieList";
 
-const UserPage = ({id}) => {
+const UserPage = ({userId}) => {
     const [user, setUser] = useState();
     const history = useHistory();
     useEffect(() => {
