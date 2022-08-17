@@ -7,17 +7,14 @@ import GroupList from "./groupList";
 import SearchStatus from "./searchStatus";
 import UserTable from "./usersTable";
 import _ from "lodash";
-import {useParams} from "react-router-dom";
-import UserPage from "./userPage";
+
 
 const UsersList = () => {
-    const [currentPage, setCurrentPage] = useState();
+    const [currentPage, setCurrentPage] = useState(1);
     const [professions, setProfession] = useState();
     const [selectedProf, setSelectedProf] = useState();
     const [sortBy, setSortBy] = useState({ path: "name", order: "asc" });
     const pageSize = 8;
-    const params = useParams();
-    const { userId } = params;
 
     const [users, setUsers] = useState();
     useEffect(() => {
@@ -55,10 +52,6 @@ const UsersList = () => {
         setSortBy(item);
     };
 
-    if (userId) {
-        return <UserPage id={userId} />;
-    }
-
     if (users) {
         const filteredUsers = selectedProf
             ? users.filter(
@@ -69,7 +62,11 @@ const UsersList = () => {
             : users;
 
         const count = filteredUsers.length;
-        const sortedUsers = _.orderBy(filteredUsers, [sortBy.path], [sortBy.order]);
+        const sortedUsers = _.orderBy(
+            filteredUsers,
+            [sortBy.path],
+            [sortBy.order]
+        );
         const usersCrop = paginate(sortedUsers, currentPage, pageSize);
         const clearFilter = () => {
             setSelectedProf();
@@ -89,7 +86,7 @@ const UsersList = () => {
                             onClick={clearFilter}
                         >
                             {" "}
-                            Очистить
+                            Очиститть
                         </button>
                     </div>
                 )}
