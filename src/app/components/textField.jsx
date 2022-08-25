@@ -17,7 +17,7 @@ const TextField = ({label, type, name, value, onChange, error}) => {
                     <input type={showPassword?'true':type}
                            id={name}
                            value={value}
-                           onChange={onChange}
+                           onChange={ onChange }
                            name={name}
                            className={getInputClasses()}
                     />
