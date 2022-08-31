@@ -7,6 +7,7 @@ import GroupList from "./groupList";
 import SearchStatus from "./searchStatus";
 import UserTable from "./usersTable";
 import _ from "lodash";
+import InputSearch from "./inputSearch";
 
 const UsersList = () => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -16,6 +17,8 @@ const UsersList = () => {
     const pageSize = 8;
 
     const [users, setUsers] = useState();
+    const [searchInputText, setSearchInputText] = useState('');
+    const [matchUsers, setMatchUsers] = useState();
     useEffect(() => {
         api.users.fetchAll().then((data) => setUsers(data));
     }, []);
@@ -40,7 +43,14 @@ const UsersList = () => {
         setCurrentPage(1);
     }, [selectedProf]);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchInputText]);
+
+
     const handleProfessionSelect = (item) => {
+        setMatchUsers();
+        setSearchInputText("");
         setSelectedProf(item);
     };
 
@@ -51,6 +61,14 @@ const UsersList = () => {
         setSortBy(item);
     };
 
+    const handleUserSearch = ({ target }) => {
+        setSelectedProf();
+        const searchResult = users.filter((user) => user.name.toLowerCase().includes(target.value.toLowerCase())
+        );
+        setSearchInputText(target.value);
+        setMatchUsers(searchResult);
+    };
+
     if (users) {
         const filteredUsers = selectedProf
             ? users.filter(
@@ -58,7 +76,7 @@ const UsersList = () => {
                     JSON.stringify(user.profession) ===
                     JSON.stringify(selectedProf)
             )
-            : users;
+            : matchUsers || users;
 
         const count = filteredUsers.length;
         const sortedUsers = _.orderBy(
@@ -91,6 +109,10 @@ const UsersList = () => {
                 )}
                 <div className="d-flex flex-column">
                     <SearchStatus length={count} />
+                    <InputSearch
+                        value={searchInputText}
+                        onChange={handleUserSearch}
+                    />
                     {count > 0 && (
                         <UserTable
                             users={usersCrop}
