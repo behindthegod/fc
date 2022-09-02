@@ -1,11 +1,18 @@
 import React, {useEffect, useState} from 'react';
 import {validator} from "../../utils/validator";
 import TextField from "../common/form/textField";
+import api from './../../api';
+import SelectField from "../common/form/selectField";
 
 const RegisterForm = () => {
-    
-    const [data, setData] = useState({email: '', password: ''});
+
+    const [data, setData] = useState({email: '', password: '', profession: ''});
+    const [professions, setProfession] = useState();
     const [errors, setErrors] = useState({});
+    useEffect(() => {
+        api.professions.fetchAll().then((data) => setProfession(data));
+    }, []);
+
     const handleChange = (e) => {
         setData((prevState) => ({...prevState, [e.target.name]: e.target.value}));
     }
@@ -27,6 +34,11 @@ const RegisterForm = () => {
             min: {
                 message: 'Пароль должен быть длинее 8 символов',
                 value: 8
+            }
+        },
+        profession: {
+            isRequired: {
+                message: 'Обязательно выберите вашу профессию'
             }
         }
     }
@@ -52,13 +64,23 @@ const RegisterForm = () => {
                            name='email'
                            error={errors.email}
                            value={data.email}
-                           onChange={handleChange}/>
+                           onChange={handleChange}
+                />
                 <TextField label='password'
                            type='password'
                            name='password'
                            error={errors.password}
                            value={data.password}
-                           onChange={handleChange}/>
+                           onChange={handleChange}
+                />
+                <SelectField
+                    label='Выбери свою профессию'
+                    options={professions}
+                    onChange={handleChange}
+                    value={data.profession}
+                    defaultOption='Choose...'
+                    error={errors.profession}
+                />
             </div>
             <button type='submit' disabled={!isValid} className='btn btn-primary w-100 mx-auto'>submit</button>
         </form>
