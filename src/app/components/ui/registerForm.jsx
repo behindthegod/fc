@@ -4,6 +4,7 @@ import TextField from "../common/form/textField";
 import api from './../../api';
 import SelectField from "../common/form/selectField";
 import RadioField from "../common/form/radioField";
+import MultiSelect from "../common/form/multiSelect";
 
 const RegisterForm = () => {
 
@@ -12,15 +13,18 @@ const RegisterForm = () => {
         password: '',
         profession: '',
         sex:'male',
+        qualities: [],
     });
     const [professions, setProfession] = useState();
     const [errors, setErrors] = useState({});
+    const [qualities, setQualities] = useState({});
     useEffect(() => {
         api.professions.fetchAll().then((data) => setProfession(data));
+        api.qualities.fetchAll().then((data) => setQualities(data));
     }, []);
 
-    const handleChange = (e) => {
-        setData((prevState) => ({...prevState, [e.target.name]: e.target.value}));
+    const handleChange = (target) => {
+        setData((prevState) => ({...prevState, [target.name]: target.value}));
     }
     const validate = () => {
         const errors = validator(data, validatorConfig);
@@ -86,6 +90,7 @@ const RegisterForm = () => {
                     value={data.profession}
                     defaultOption='Choose...'
                     error={errors.profession}
+                    name='qualities'
                 />
             </div>
             <RadioField options={[
@@ -96,8 +101,16 @@ const RegisterForm = () => {
                         value={data.sex}
                         name='sex'
                         onChange={handleChange}
+                        label='Выберите ваш пол'
             />
-            <button type='submit' disabled={!isValid} className='btn btn-primary w-100 mx-auto'>submit</button>
+            <MultiSelect options={qualities}
+                         onChange={handleChange}
+                         name='qualities'
+                         label='Выберите ваши качества'
+            />
+            <button type='submit'
+                    disabled={!isValid}
+                    className='btn btn-primary w-100 mx-auto'>submit</button>
         </form>
     );
 };
