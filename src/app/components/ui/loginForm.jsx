@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {validator} from "../../utils/validator";
 import TextField from "../common/form/textField";
+import CheckBoxField from "../common/form/checkBoxField";
 
 const LoginForm = () => {
-    const [data, setData] = useState({email: '', password: ''});
+    const [data, setData] = useState({email: '', password: '', stayOn:false});
     const [errors, setErrors] = useState({});
-    const handleChange = (e) => {
-        setData((prevState) => ({...prevState, [e.target.name]: e.target.value}));
+    const handleChange = (target) => {
+        setData((prevState) => ({...prevState, [target.name]: target.value}));
     }
     const validate = () => {
         const errors = validator(data, validatorConfig);
@@ -18,7 +19,6 @@ const LoginForm = () => {
             isRequired: {message: 'Электронная почта обязательна для заполнения'},
             isEmail: {message: 'E-mail введен не корректно'},
         },
-
         password: {
             isRequired: {message: 'Пароль обязателен для заполнения'},
             isCapitalSymbol: {message: 'Пароль должен содержать хотя бы одну заглавную букву'},
@@ -59,6 +59,13 @@ const LoginForm = () => {
                            value={data.password}
                            onChange={handleChange}/>
             </div>
+            <CheckBoxField
+                value={data.stayOn}
+                onChange={handleChange}
+                name='stayOn'
+            >
+                Оставаться в системе
+            </CheckBoxField>
             <button type='submit' disabled={!isValid} className='btn btn-primary w-100 mx-auto'>submit</button>
         </form>
     );
