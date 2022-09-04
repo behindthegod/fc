@@ -2,24 +2,26 @@ import React from 'react';
 import PropTypes from "prop-types";
 
 
-const SelectField = ({label, value, onChange, defaultOption, options, error}) => {
+const SelectField = ({label, value, onChange, defaultOption, options, error, name}) => {
     const getInputClasses = () => {
         return 'form-select' + (error ? ' is-invalid' : '');
     }
     const handleChange = ({target})=> {
         onChange({name: target.name, value:target.value});
     }
-    const optionsArray = !Array.isArray(options) && typeof(options) === 'object' ?
-        Object.keys(options).map((optionName) => ({name: options[optionName].name,value: options[optionName]._id})): options
+    const optionsArray =
+        !Array.isArray(options) && typeof options === "object"
+            ? Object.values(options)
+            : options;
     return (
         <div className="mb-3">
-            <label htmlFor="validationCustom04" className="form-label">{label}</label>
+            <label htmlFor={name} className="form-label">{label}</label>
             <select
                 className={getInputClasses()}
                 value={value}
-                name='profession'
+                name={name}
                 onChange={handleChange}
-                id="validationCustom04"
+                id={name}
             >
                 <option disabled value="">{defaultOption}</option>
                 {
@@ -27,7 +29,7 @@ const SelectField = ({label, value, onChange, defaultOption, options, error}) =>
                         value={option.value}
                         key={option.value}
                     >
-                        {option.name}
+                        {option.label}
                     </option>)
                 }
             </select>
@@ -42,6 +44,7 @@ SelectField.propTypes = {
     onChange: PropTypes.func,
     error: PropTypes.string,
     placeholder: PropTypes.string,
-    options: PropTypes.oneOfType([PropTypes.object, PropTypes.array])
+    options: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+    name: PropTypes.string
 }
 export default SelectField;
