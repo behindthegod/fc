@@ -4,14 +4,14 @@ import api from "../../../api";
 import Qualities from "../../ui/qualities/qualitieList";
 import PropTypes from "prop-types";
 
-const UserPage = ({ userId }) => {
+const UserPage = ({userId}) => {
     const history = useHistory();
     const [user, setUser] = useState();
     useEffect(() => {
         api.users.getById(userId).then((data) => setUser(data));
     }, []);
     const handleClick = () => {
-        history.push("/users");
+        history.push(`/users/${userId}/edit`);
     };
     if (user) {
         return (
@@ -21,7 +21,7 @@ const UserPage = ({ userId }) => {
                 <Qualities qualities={user.qualities} />
                 <p>completedMeetings: {user.completedMeetings}</p>
                 <h2>Rate: {user.rate}</h2>
-                <button onClick={handleClick}> Все Пользователи</button>
+                <button onClick={handleClick}>Редактровать данные</button>
             </div>
         );
     } else {
