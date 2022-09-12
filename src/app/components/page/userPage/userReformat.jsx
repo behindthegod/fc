@@ -5,141 +5,200 @@ import TextField from "../../common/form/textField";
 import SelectField from "../../common/form/selectField";
 import RadioField from "../../common/form/radioField";
 import MultiSelect from "../../common/form/multiSelect";
+import {useHistory} from "react-router-dom";
+import PropTypes from "prop-types";
+
 
 const UserReformat = ({userId}) => {
 
-    const [data, setData] = useState({
-        name: '',
-        email: '',
-        profession: '',
-        sex: '',
-        qualities: [],
-    });
+    const [user, setUser] = useState();
+    const [edit, setEdit] = useState();
+    const [qualities, setQualities] = useState([]);
+    const [professions, setProfession] = useState([]);
     const [errors, setErrors] = useState({});
-    const [professions, setProfessions] = useState({});
-    const [qualities, setQualities] = useState();
+    const history = useHistory();
 
-    useEffect(()=> {
-        api.users.getById(userId).then((data)=>{
-            setData({
-                name: data.name,
+    useEffect(() => {
+        api.users.getById(userId).then((data) => {
+            setUser(data);
+        });
+
+        api.users.getById(userId).then((data) =>
+            setEdit({
+                userName: data.name,
                 email: data.email,
-                profession: data.profession,
+                profession: data.profession._id,
                 sex: data.sex,
-                qualities: data.qualities
+                qualities: data.qualities.map((q) => ({
+                    value: q._id,
+                    label: q.name,
+                    color: q.color
+                }))
             })
-        })
-        api.professions.fetchAll().then((data)=>setProfessions(data));
-        api.qualities.fetchAll().then((data)=> setQualities(data));
+        );
     }, []);
+
+    useEffect(() => {
+        api.professions.fetchAll().then((data) => {
+            const profList = Object.keys(data).map((professionName) => ({
+                label: data[professionName].name,
+                value: data[professionName]._id
+            }));
+            setProfession(profList);
+        });
+
+        api.qualities.fetchAll().then((data) => {
+            const qualList = Object.keys(data).map((optionName) => ({
+                value: data[optionName]._id,
+                label: data[optionName].name,
+                color: data[optionName].color
+            }));
+            setQualities(qualList);
+        });
+    }, []);
+
+    const getProfessionById = (id) => {
+        for (const p of professions) {
+            if (p.value === id) {
+                return {_id: p.value, name: p.label};
+            }
+        }
+    };
+    const getQualities = (elements) => {
+        const qualitiesArray = [];
+        for (const el of elements) {
+            for (const quality in qualities) {
+                if (el.value === qualities[quality].value) {
+                    qualitiesArray.push({
+                        _id: qualities[quality].value,
+                        name: qualities[quality].label,
+                        color: qualities[quality].color
+                    });
+                }
+            }
+        }
+        return qualitiesArray;
+    };
+
+    const handleChange = (target) => {
+        setEdit((prevState) => ({
+            ...prevState,
+            [target.name]: target.value
+        }));
+    };
+
+    const handleUpdateDataUser = () => {
+        const {profession, qualities} = edit;
+        setUser((prevState) => ({
+            ...prevState,
+            name: edit.userName,
+            email: edit.email,
+            sex: edit.sex,
+            profession: getProfessionById(profession),
+            qualities: getQualities(qualities),
+        }));
+    };
 
     const validatorConfig = {
         email: {
             isRequired: {
-                message: "Email обязателен к заполнению"
+                message: "Email обязателен для заполнения"
             },
             isEmail: {
                 message: "Email введен некорректно"
             }
         },
-        name: {
+        profession: {
             isRequired: {
-                message: "Обязательно введите имя"
+                message: "Обязательно выберите вашу профессию"
             }
         }
     };
-
-    const validate = () => {
-        const errors = validator(data, validatorConfig);
-        setErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
-
     useEffect(() => {
         validate();
-    }, [data]);
+    }, [edit]);
 
-    const handleChange = (target) => {
-        setData((prevState) =>({...prevState, [target.name]: target.value}));
+    const validate = () => {
+        const errors = validator(edit, validatorConfig);
+        setErrors(errors);
+
+        return Object.keys(errors).length === 0;
     };
-
     const isValid = Object.keys(errors).length === 0;
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const isValid = validate();
         if (!isValid) return;
-        console.log('привет')
+        api.users.update(userId, user);
+        history.push(`/users/${userId}`);
     };
 
-
-    if (data.qualities && Object.keys(professions).length !== 0) {
-        return (
-            <div className="container mt-5">
-                <div className="row">
-                    <div className="col-md-8 offset-md-3 shadow p-4">
+    return (
+        <div className="container mt-5">
+            <div className="row">
+                <div className="col-md-6 offset-md-3 shadow p-4">
+                    {edit ? (
                         <form onSubmit={handleSubmit}>
                             <TextField
                                 label="Имя"
-                                name="name"
-                                value={data.name}
+                                name="userName"
+                                value={edit.userName}
                                 onChange={handleChange}
-                                error={errors.name}
-                            />
+                                error={errors.userName}/>
+
                             <TextField
                                 label="Электронная почта"
-                                type="email"
                                 name="email"
-                                value={data.email}
+                                value={edit.email}
                                 onChange={handleChange}
-                                error={errors.email}
-                            />
+                                error={errors.email}/>
+
                             <SelectField
-                                onChange={handleChange}
-                                options={professions}
-                                defaultOption="Choose..."
-                                name="profession"
-                                value={data.profession.name}
                                 label="Выбери свою профессию"
-                            />
+                                defaultOption="Choose..."
+                                options={professions}
+                                name="profession"
+                                onChange={handleChange}
+                                value={edit.profession}
+                                error={errors.profession}/>
+
                             <RadioField
                                 options={[
-                                    { name: "Male", value: "male" },
-                                    { name: "Female", value: "female" },
-                                    { name: "Other", value: "other" }
+                                    {name: "Male", value: "male"},
+                                    {name: "Female", value: "female"},
+                                    {name: "Other", value: "other"}
                                 ]}
-                                value={data.sex}
+                                value={edit.sex}
                                 name="sex"
                                 onChange={handleChange}
-                                label="Выберите ваш пол"
-                            />
+                                label="Выберите ваш пол"/>
+
                             <MultiSelect
                                 options={qualities}
                                 onChange={handleChange}
-                                defaultValue={data.qualities.map(
-                                    (q) => ({
-                                        label: q.name,
-                                        value: q._id
-                                    })
-                                )}
+                                defaultValue={edit.qualities}
                                 name="qualities"
-                                label="Выберите ваши качества"
-                            />
-
+                                label="Выберите ваши качества"/>
                             <button
+                                className="btn btn-primary w-100 mx-auto"
                                 type="submit"
+                                onClick={handleUpdateDataUser}
                                 disabled={!isValid}
                             >
                                 Обновить
                             </button>
                         </form>
-                    </div>
+                    ) : (
+                        <div>Loading...</div>
+                    )}
                 </div>
             </div>
-        );
-    } else {
-        return "loading...";
-    }
-};
+        </div>
+    );
 
+};
+UserReformat.propTypes = {
+    userId: PropTypes.string.isRequired
+};
 export default UserReformat;

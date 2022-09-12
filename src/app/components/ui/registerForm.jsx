@@ -53,8 +53,8 @@ const RegisterForm = () => {
         });
         api.qualities.fetchAll().then((data) => {
             const qualitiesList = Object.keys(data).map((optionName) => ({
-                value: data[optionName]._id,
                 label: data[optionName].name,
+                value: data[optionName]._id,
                 color: data[optionName].color
             }));
             setQualities(qualitiesList);
@@ -144,7 +144,7 @@ const RegisterForm = () => {
                 label="Выбери свою профессию"
                 defaultOption="Choose..."
                 options={professions}
-                name="profession"
+                name='profession'
                 onChange={handleChange}
                 value={data.profession}
                 error={errors.profession}
